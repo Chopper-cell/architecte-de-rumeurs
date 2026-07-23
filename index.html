@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>L'Architecte de Rumeurs — Prototype</title>
+  <style>
+    :root {
+      --fond: #f4f1ea;
+      --carte: #ffffff;
+      --encre: #263238;
+      --accent: #7b3f98;
+      --accent-fonce: #592b70;
+      --bordure: #d8d2c7;
+      --info: #e8f3ff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--fond);
+      color: var(--encre);
+      font-family: Arial, sans-serif;
+      line-height: 1.5;
+    }
+
+    main {
+      width: min(900px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 32px 0 48px;
+    }
+
+    header { margin-bottom: 24px; }
+
+    h1 { margin: 0 0 8px; }
+    h2 { margin-top: 0; font-size: 1.25rem; }
+
+    .sous-titre { margin: 0; color: #54656b; }
+
+    .carte {
+      background: var(--carte);
+      border: 1px solid var(--bordure);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(38, 50, 56, 0.06);
+    }
+
+    .regle {
+      background: var(--info);
+      border-left: 4px solid #3c82c7;
+      padding: 12px 16px;
+      border-radius: 4px;
+    }
+
+    .choix {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin: 20px 0;
+    }
+
+    label { display: block; font-weight: bold; }
+
+    select {
+      width: 100%;
+      margin-top: 6px;
+      padding: 10px;
+      border: 1px solid var(--bordure);
+      border-radius: 6px;
+      background: white;
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      border-radius: 6px;
+      padding: 12px 18px;
+      background: var(--accent);
+      color: white;
+      font: inherit;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover { background: var(--accent-fonce); }
+
+    .apercu {
+      margin: 16px 0 0;
+      padding: 16px;
+      background: #fbf7fc;
+      border: 1px dashed var(--accent);
+      border-radius: 8px;
+    }
+
+    .journal {
+      min-height: 80px;
+      margin: 0;
+      padding: 16px;
+      background: #fafafa;
+      border-radius: 8px;
+      color: #54656b;
+    }
+
+    .resultats { display: none; }
+    .resultats.visible { display: block; }
+
+    .statistiques {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 16px 0;
+    }
+
+    .statistique {
+      margin: 0;
+      padding: 14px;
+      border: 1px solid var(--bordure);
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .statistique strong {
+      display: block;
+      margin-top: 4px;
+      color: var(--accent-fonce);
+      font-size: 1.4rem;
+    }
+
+    @media (max-width: 650px) {
+      .choix { grid-template-columns: 1fr; }
+      .statistiques { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>L'Architecte de Rumeurs</h1>
+      <p class="sous-titre">Prototype satirique et pédagogique — dans un univers entièrement fictif.</p>
+    </header>
+
+    <section class="carte regle" aria-label="Règle du jeu">
+      Compose un message fictif, puis observe comment il circulera dans un réseau de personnages imaginaires.
+      L'objectif est de comprendre les mécanismes de déformation, pas de les reproduire dans la vraie vie.
+    </section>
+
+    <section class="carte" aria-labelledby="titre-composition">
+      <h2 id="titre-composition">1. Composer la rumeur</h2>
+
+      <div class="choix">
+        <label for="fait">
+          Fait de départ
+          <select id="fait">
+            <option>La fontaine du village est en réparation.</option>
+            <option>Le maire a planté un arbre sur la place.</option>
+            <option>La bibliothèque ouvre une heure plus tard le samedi.</option>
+            <option>Un chat a été aperçu près du marché nocturne.</option>
+            <option>Le clocher sonnera exceptionnellement à midi.</option>
+            <option>Une nouvelle piste cyclable est en discussion.</option>
+            <option>Le boulanger teste une recette de brioche violette.</option>
+            <option>Le musée municipal prête une statue pour une exposition.</option>
+            <option>Le marché du dimanche accueillera trois nouveaux stands.</option>
+            <option>Une boîte à livres a été installée près de la gare.</option>
+          </select>
+        </label>
+
+        <label for="biais">
+          Déformation choisie
+          <select id="biais">
+            <option>Exagération</option>
+            <option>Appel à la peur</option>
+            <option>Fausse causalité</option>
+            <option>Flatterie</option>
+            <option>Omission sélective</option>
+            <option>Faux consensus</option>
+            <option>Effet de rareté</option>
+          </select>
+        </label>
+
+        <label for="ton">
+          Ton du message
+          <select id="ton">
+            <option>Drôle</option>
+            <option>Alarmant</option>
+            <option>Flatteur</option>
+            <option>Mystérieux</option>
+            <option>Indigné</option>
+            <option>Rassurant</option>
+          </select>
+        </label>
+      </div>
+
+      <button id="bouton-lancer" type="button">Lancer la rumeur</button>
+
+      <div class="apercu" aria-live="polite">
+        <strong>Aperçu du message :</strong>
+        <p id="texte-apercu">Choisis les éléments ci-dessus, puis lance la rumeur.</p>
+      </div>
+    </section>
+
+    <section class="carte" aria-labelledby="titre-simulation">
+      <h2 id="titre-simulation">2. Simulation</h2>
+      <div id="journal-simulation" class="journal" aria-live="polite">
+        Compose un message, puis lance la rumeur pour voir les six tours de propagation.
+      </div>
+    </section>
+
+    <section id="zone-resultats" class="carte resultats" aria-labelledby="titre-resultats">
+      <h2 id="titre-resultats">3. Résultats</h2>
+      <div class="statistiques">
+        <p class="statistique">Portée<strong id="valeur-portee">0</strong></p>
+        <p class="statistique">Crédibilité<strong id="valeur-credibilite">0 %</strong></p>
+        <p class="statistique">Déformation<strong id="valeur-deformation">0 %</strong></p>
+      </div>
+      <p id="explication-resultats"></p>
+      <button id="bouton-rejouer" type="button">Rejouer</button>
+    </section>
+  </main>
+
+  <script>
+    // Les données de chaque PNJ : son nom, son scepticisme, ses goûts par ton et ses amis.
+    // Les numéros dans "amis" correspondent à la position d'un PNJ dans ce tableau.
+    const pnjs = [
+      { nom: 'Amina', scepticisme: 32, gouts: { Drôle: 84, Alarmant: 44, Flatteur: 58 }, amis: [1, 4, 9] },
+      { nom: 'Bastien', scepticisme: 67, gouts: { Drôle: 55, Alarmant: 40, Flatteur: 47 }, amis: [0, 2, 6] },
+      { nom: 'Chloé', scepticisme: 26, gouts: { Drôle: 62, Alarmant: 79, Flatteur: 45 }, amis: [1, 3, 7, 11] },
+      { nom: 'Dario', scepticisme: 51, gouts: { Drôle: 48, Alarmant: 60, Flatteur: 75 }, amis: [2, 4, 12] },
+      { nom: 'Élise', scepticisme: 39, gouts: { Drôle: 81, Alarmant: 52, Flatteur: 62 }, amis: [0, 3, 5] },
+      { nom: 'Farid', scepticisme: 72, gouts: { Drôle: 42, Alarmant: 49, Flatteur: 43 }, amis: [4, 6, 13] },
+      { nom: 'Gaïa', scepticisme: 18, gouts: { Drôle: 73, Alarmant: 86, Flatteur: 54 }, amis: [1, 5, 7, 14] },
+      { nom: 'Hugo', scepticisme: 44, gouts: { Drôle: 66, Alarmant: 56, Flatteur: 71 }, amis: [2, 6, 8] },
+      { nom: 'Inès', scepticisme: 58, gouts: { Drôle: 50, Alarmant: 68, Flatteur: 52 }, amis: [7, 9, 15] },
+      { nom: 'Jules', scepticisme: 23, gouts: { Drôle: 88, Alarmant: 47, Flatteur: 66 }, amis: [0, 8, 10, 16] },
+      { nom: 'Kenza', scepticisme: 62, gouts: { Drôle: 57, Alarmant: 54, Flatteur: 80 }, amis: [9, 11, 17] },
+      { nom: 'Léo', scepticisme: 35, gouts: { Drôle: 69, Alarmant: 76, Flatteur: 49 }, amis: [2, 10, 12, 18] },
+      { nom: 'Maya', scepticisme: 48, gouts: { Drôle: 61, Alarmant: 63, Flatteur: 68 }, amis: [3, 11, 13] },
+      { nom: 'Nolan', scepticisme: 76, gouts: { Drôle: 41, Alarmant: 46, Flatteur: 51 }, amis: [5, 12, 14, 19] },
+      { nom: 'Ophélie', scepticisme: 29, gouts: { Drôle: 77, Alarmant: 72, Flatteur: 59 }, amis: [6, 13, 15, 20] },
+      { nom: 'Paco', scepticisme: 54, gouts: { Drôle: 58, Alarmant: 65, Flatteur: 73 }, amis: [8, 14, 16] },
+      { nom: 'Quentin', scepticisme: 37, gouts: { Drôle: 82, Alarmant: 50, Flatteur: 64 }, amis: [9, 15, 17, 21] },
+      { nom: 'Rania', scepticisme: 64, gouts: { Drôle: 46, Alarmant: 74, Flatteur: 56 }, amis: [10, 16, 18] },
+      { nom: 'Sofia', scepticisme: 21, gouts: { Drôle: 75, Alarmant: 83, Flatteur: 61 }, amis: [11, 17, 19, 22] },
+      { nom: 'Tarek', scepticisme: 57, gouts: { Drôle: 53, Alarmant: 59, Flatteur: 77 }, amis: [13, 18, 20] },
+      { nom: 'Uma', scepticisme: 42, gouts: { Drôle: 71, Alarmant: 67, Flatteur: 55 }, amis: [14, 19, 21, 23] },
+      { nom: 'Valentin', scepticisme: 69, gouts: { Drôle: 45, Alarmant: 53, Flatteur: 60 }, amis: [16, 20, 22] },
+      { nom: 'Warda', scepticisme: 33, gouts: { Drôle: 79, Alarmant: 70, Flatteur: 57 }, amis: [18, 21, 23] },
+      { nom: 'Xavier', scepticisme: 50, gouts: { Drôle: 64, Alarmant: 58, Flatteur: 69 }, amis: [20, 22] }
+    ];
+
+    // Les trois tons supplémentaires sont dérivés des goûts déjà présents.
+    // Chaque PNJ garde donc des scores différents, sans alourdir les 24 lignes de données.
+    pnjs.forEach((pnj) => {
+      pnj.gouts.Mystérieux = Math.round((pnj.gouts.Drôle + pnj.gouts.Alarmant) / 2);
+      pnj.gouts.Indigné = Math.round((pnj.gouts.Alarmant + pnj.gouts.Flatteur) / 2);
+      pnj.gouts.Rassurant = Math.round((pnj.gouts.Drôle + pnj.gouts.Flatteur) / 2);
+    });
+
+    // On récupère les éléments HTML dont JavaScript aura besoin.
+    const fait = document.querySelector('#fait');
+    const biais = document.querySelector('#biais');
+    const ton = document.querySelector('#ton');
+    const boutonLancer = document.querySelector('#bouton-lancer');
+    const texteApercu = document.querySelector('#texte-apercu');
+    const journalSimulation = document.querySelector('#journal-simulation');
+    const zoneResultats = document.querySelector('#zone-resultats');
+    const valeurPortee = document.querySelector('#valeur-portee');
+    const valeurCredibilite = document.querySelector('#valeur-credibilite');
+    const valeurDeformation = document.querySelector('#valeur-deformation');
+    const explicationResultats = document.querySelector('#explication-resultats');
+    const boutonRejouer = document.querySelector('#bouton-rejouer');
+
+    function construireApercu() {
+      return `Fait de départ : « ${fait.value} » Ton : ${ton.value.toLowerCase()}. Déformation : ${biais.value.toLowerCase()}.`;
+    }
+
+    // Cette fonction ajoute une ligne au journal sans effacer les tours précédents.
+    function ajouterLigne(texte) {
+      const ligne = document.createElement('p');
+      ligne.textContent = texte;
+      journalSimulation.appendChild(ligne);
+    }
+
+    // Cette règle donne une déformation différente selon le biais choisi.
+    // Un PNJ peu sceptique (moins de 40) amplifie davantage ce qu'il relaie.
+    function calculerGainDeformation(biaisChoisi, scepticisme) {
+      const forceDuBiais = {
+        Exagération: 10,
+        'Appel à la peur': 8,
+        'Fausse causalité': 7,
+        Flatterie: 5,
+        'Omission sélective': 6,
+        'Faux consensus': 8,
+        'Effet de rareté': 9
+      };
+      const bonusPeuSceptique = scepticisme < 40 ? 3 : 0;
+      return forceDuBiais[biaisChoisi] + bonusPeuSceptique;
+    }
+
+    // La simulation utilise exactement six tours. Un PNJ n'est évalué qu'une fois :
+    // dès qu'il a reçu le message, il ne peut plus le recevoir une seconde fois.
+    function simulerPropagation() {
+      const tonChoisi = ton.value;
+      const biaisChoisi = biais.value;
+      const depart = Math.floor(Math.random() * pnjs.length);
+      const dejaAtteints = new Set([depart]);
+      let fileDuTour = [depart];
+      let nombreQuiCroient = 1;
+      let deformation = 0;
+
+      journalSimulation.innerHTML = '';
+      ajouterLigne(`PNJ de départ choisi au hasard : ${pnjs[depart].nom}.`);
+      ajouterLigne('Règle : compatibilité avec le ton − action du Rectificateur > scepticisme = le PNJ transmet.');
+
+      for (let numeroTour = 1; numeroTour <= 6; numeroTour += 1) {
+        const rectificateur = numeroTour >= 3 ? 15 : 0;
+        const prochainTour = [];
+        ajouterLigne(`Tour ${numeroTour} — le Rectificateur applique un frein de ${rectificateur} point(s).`);
+
+        fileDuTour.forEach((indexPnj) => {
+          const pnj = pnjs[indexPnj];
+          const compatibilite = pnj.gouts[tonChoisi];
+          const score = compatibilite - rectificateur;
+          const transmet = score > pnj.scepticisme;
+
+          if (transmet) {
+            // Le PNJ de départ est déjà compté comme croyant ; les autres le deviennent ici.
+            if (indexPnj !== depart) {
+              nombreQuiCroient += 1;
+            }
+            const gainDeformation = calculerGainDeformation(biaisChoisi, pnj.scepticisme);
+            deformation = Math.min(deformation + gainDeformation, 100);
+            const nouveauxAmis = pnj.amis.filter((indexAmi) => !dejaAtteints.has(indexAmi));
+            nouveauxAmis.forEach((indexAmi) => {
+              dejaAtteints.add(indexAmi);
+              prochainTour.push(indexAmi);
+            });
+
+            const nomsAmis = nouveauxAmis.map((indexAmi) => pnjs[indexAmi].nom);
+            if (nomsAmis.length > 0) {
+              ajouterLigne(`${pnj.nom} transmet : ${compatibilite} − ${rectificateur} = ${score}, supérieur à ${pnj.scepticisme}. Il/elle prévient ${nomsAmis.join(', ')}. Déformation : +${gainDeformation} %.`);
+            } else {
+              ajouterLigne(`${pnj.nom} transmet, mais tous ses amis ont déjà reçu la rumeur.`);
+            }
+          } else {
+            ajouterLigne(`${pnj.nom} ne transmet pas : ${compatibilite} − ${rectificateur} = ${score}, pas supérieur à son scepticisme de ${pnj.scepticisme}.`);
+          }
+        });
+
+        if (prochainTour.length === 0) {
+          ajouterLigne('La rumeur ne trouve plus de nouveau relais : les tours restants sont arrêtés.');
+          break;
+        }
+        fileDuTour = prochainTour;
+      }
+
+      // On renvoie les données à la fin : la fonction ne se contente donc pas d'afficher le journal.
+      return {
+        portee: dejaAtteints.size,
+        credibilite: Math.round((nombreQuiCroient / pnjs.length) * 100),
+        deformation
+      };
+    }
+
+    // Cette fonction transforme les nombres calculés en texte visible dans la carte Résultats.
+    function afficherResultats(resultats) {
+      let phraseDrole;
+
+      // Trois conclusions selon l'ampleur de la déformation observée.
+      if (resultats.deformation >= 70) {
+        phraseDrole = 'Conclusion : la rumeur a tellement voyagé qu’elle demande maintenant son propre passeport.';
+      } else if (resultats.deformation >= 35) {
+        phraseDrole = 'Conclusion : la rumeur a pris quelques libertés artistiques en chemin.';
+      } else {
+        phraseDrole = 'Conclusion : étonnamment, cette rumeur est restée presque reconnaissable. Le village est déçu.';
+      }
+
+      valeurPortee.textContent = `${resultats.portee} PNJ`;
+      valeurCredibilite.textContent = `${resultats.credibilite} %`;
+      valeurDeformation.textContent = `${resultats.deformation} %`;
+      explicationResultats.textContent = `La déformation dépend du biais choisi (5 à 10 %) et gagne 3 % de plus quand le relais est peu sceptique. Elle est plafonnée à 100 %. ${phraseDrole}`;
+      zoneResultats.classList.add('visible');
+    }
+
+    boutonLancer.addEventListener('click', () => {
+      texteApercu.textContent = construireApercu();
+      const resultats = simulerPropagation();
+      afficherResultats(resultats);
+    });
+
+    // Rejouer masque les anciens résultats et replace la page au début, sans recharger le fichier.
+    boutonRejouer.addEventListener('click', () => {
+      zoneResultats.classList.remove('visible');
+      texteApercu.textContent = 'Choisis les éléments ci-dessus, puis lance la rumeur.';
+      journalSimulation.textContent = 'Compose un message, puis lance la rumeur pour voir les six tours de propagation.';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  </script>
+</body>
+</html>
