@@ -41,3 +41,7 @@ Le projet tient dans un seul fichier autonome : HTML pour la structure, CSS pour
 ## Statut
 
 Prototype en cours d'évolution, réalisé comme projet d'apprentissage.
+
+## Studio 3D : du scénario à la séquence
+
+Le dossier [`studio-3d/`](studio-3d/README.md) contient un second outil. Il transforme un scénario écrit en séquences 3D : décors, personnages animés, dialogues sous-titrés, éclairages, découpage caméra et export vidéo. Pour l'utiliser, ouvre `studio-3d/index.html` dans un navigateur.

@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Studio 3D — Scénario en séquences</title>
+  <style>
+    :root {
+      --fond: #15131a;
+      --panneau: #1f1c26;
+      --panneau-clair: #2a2633;
+      --encre: #ece7f3;
+      --encre-douce: #a9a1b7;
+      --accent: #9b5cc0;
+      --accent-fonce: #7b3f98;
+      --bordure: #3a3445;
+      --ok: #6fcf97;
+      --alerte: #f2c94c;
+      --erreur: #eb5757;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--fond);
+      color: var(--encre);
+      font-family: Arial, sans-serif;
+      line-height: 1.45;
+    }
+
+    header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px 24px;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--bordure);
+    }
+
+    h1 { margin: 0; font-size: 1.35rem; }
+    h2 { margin: 0 0 10px; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--encre-douce); }
+    header p { margin: 0; color: var(--encre-douce); font-size: 0.92rem; }
+    header a { color: var(--accent); }
+
+    main {
+      display: grid;
+      grid-template-columns: minmax(320px, 420px) 1fr;
+      gap: 20px;
+      padding: 20px 24px 32px;
+    }
+
+    .panneau {
+      background: var(--panneau);
+      border: 1px solid var(--bordure);
+      border-radius: 10px;
+      padding: 16px;
+    }
+
+    .colonne { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+
+    textarea {
+      width: 100%;
+      min-height: 460px;
+      resize: vertical;
+      background: #100e14;
+      color: #e9e2f5;
+      border: 1px solid var(--bordure);
+      border-radius: 8px;
+      padding: 12px;
+      font: 13px/1.55 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+      tab-size: 2;
+    }
+
+    textarea:focus, button:focus-visible, select:focus-visible, input:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 1px;
+    }
+
+    .boutons { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+
+    button, .bouton-fichier, select {
+      background: var(--panneau-clair);
+      color: var(--encre);
+      border: 1px solid var(--bordure);
+      border-radius: 8px;
+      padding: 9px 14px;
+      font-size: 0.92rem;
+      cursor: pointer;
+    }
+
+    button:hover, .bouton-fichier:hover { border-color: var(--accent); }
+
+    .principal {
+      background: var(--accent-fonce);
+      border-color: var(--accent);
+      font-weight: bold;
+    }
+
+    .principal:hover { background: var(--accent); }
+
+    .bouton-fichier input { display: none; }
+
+    .ecran {
+      position: relative;
+      background: #000;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--bordure);
+    }
+
+    canvas#rendu { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; }
+
+    .transport {
+      display: grid;
+      grid-template-columns: auto auto 1fr auto;
+      align-items: center;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    #curseur { width: 100%; accent-color: var(--accent); }
+    #temps { font-variant-numeric: tabular-nums; color: var(--encre-douce); font-size: 0.9rem; white-space: nowrap; }
+
+    #frise {
+      position: relative;
+      height: 22px;
+      margin-top: 12px;
+      background: #100e14;
+      border-radius: 5px;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    #frise .segment {
+      position: absolute;
+      top: 3px;
+      bottom: 3px;
+      border-right: 1px solid #100e14;
+      opacity: 0.85;
+    }
+
+    #frise .segment:hover { opacity: 1; }
+
+    #tete-lecture {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: #fff;
+      pointer-events: none;
+    }
+
+    .legende { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; font-size: 0.8rem; color: var(--encre-douce); }
+    .legende i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+
+    .options { display: flex; flex-wrap: wrap; gap: 10px 20px; align-items: center; margin-top: 14px; font-size: 0.92rem; }
+    .options label { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
+
+    #etat-export { color: var(--alerte); font-size: 0.9rem; margin: 10px 0 0; min-height: 1.2em; }
+
+    .grille-bas { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; }
+
+    #decoupage {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      max-height: 340px;
+      overflow-y: auto;
+    }
+
+    #decoupage button {
+      display: grid;
+      grid-template-columns: 52px 128px 1fr;
+      gap: 10px;
+      align-items: center;
+      width: 100%;
+      text-align: left;
+      background: none;
+      border: none;
+      border-bottom: 1px solid var(--bordure);
+      border-radius: 0;
+      padding: 7px 4px;
+      font-size: 0.85rem;
+    }
+
+    #decoupage li.actif button { background: var(--panneau-clair); }
+    #decoupage .tc { color: var(--encre-douce); font-variant-numeric: tabular-nums; }
+    #decoupage .type { border-radius: 4px; padding: 2px 6px; font-size: 0.75rem; text-align: center; color: #fff; }
+    #decoupage .desc { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    #decoupage .desc em { color: var(--encre-douce); }
+    #decoupage .lieu { grid-column: 3; color: var(--accent); font-size: 0.78rem; }
+
+    #messages { list-style: none; margin: 0 0 14px; padding: 0; font-size: 0.86rem; }
+    #messages li { padding: 5px 0 5px 12px; border-left: 3px solid var(--bordure); margin-bottom: 6px; }
+    #messages .ok { border-color: var(--ok); }
+    #messages .alerte { border-color: var(--alerte); color: #f5e3a8; }
+    #messages .erreur { border-color: var(--erreur); color: #f7b4b4; }
+
+    details { font-size: 0.86rem; color: var(--encre-douce); }
+    details summary { cursor: pointer; color: var(--encre); margin-bottom: 8px; }
+    details code { background: #100e14; padding: 1px 5px; border-radius: 4px; color: #e9e2f5; }
+    details ul { padding-left: 18px; margin: 6px 0; }
+
+    body.export-en-cours button:not(#lecture), body.export-en-cours input, body.export-en-cours select,
+    body.export-en-cours textarea { pointer-events: none; opacity: 0.5; }
+
+    @media (max-width: 1000px) {
+      main { grid-template-columns: 1fr; padding: 16px; }
+      .grille-bas { grid-template-columns: 1fr; }
+      textarea { min-height: 300px; }
+      header { padding: 14px 16px; }
+    }
+
+    @media (max-width: 560px) {
+      .transport { grid-template-columns: auto auto 1fr; }
+      #temps { grid-column: 1 / -1; }
+      #decoupage button { grid-template-columns: 46px 1fr; }
+      #decoupage .type { display: none; }
+      #decoupage .lieu { grid-column: 2; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Studio 3D — du scénario à la séquence</h1>
+      <p>Écris un scénario, le studio en tire automatiquement le découpage, la mise en scène 3D, les dialogues, l'éclairage et le rendu vidéo.</p>
+    </div>
+    <p><a href="../index.html">← Retour au jeu</a></p>
+  </header>
+
+  <main>
+    <section class="colonne">
+      <div class="panneau">
+        <h2><label for="scenario">Scénario</label></h2>
+        <textarea id="scenario" spellcheck="false"></textarea>
+        <div class="boutons">
+          <button type="button" id="generer" class="principal" title="Ctrl + Entrée pour générer et lire">Générer les séquences</button>
+          <button type="button" id="exemple">Exemple</button>
+          <label class="bouton-fichier">Importer .txt<input type="file" id="importer" accept=".txt,.fountain,text/plain"></label>
+          <button type="button" id="enregistrer">Enregistrer</button>
+        </div>
+      </div>
+
+      <div class="panneau">
+        <details>
+          <summary>Syntaxe du scénario</summary>
+          <ul>
+            <li><code>TITRE: Mon film</code></li>
+            <li><code>PERSONNAGE: ALICE | couleur=#d1495b | taille=1.66 | cheveux=#3b2418 | peau=#8d5524 | voix=aigue</code></li>
+            <li>En-tête de scène : <code>SCÈNE 2 — INT. CAFÉ — NUIT</code> ou <code>EXT. RUE - JOUR</code>.
+              Le lieu choisit le décor (place, rue, forêt, salon, café, bureau) ; INT/EXT et le moment choisissent l'éclairage.</li>
+            <li>Dialogue : <code>ALICE: (en colère) Texte de la réplique</code> — l'indication entre parenthèses règle l'émotion
+              (colère, peur, inquiétude, tristesse, joie, surprise, chuchote, ironie, calme).</li>
+            <li>Action : <code>[Bruno marche vers Alice.]</code> — verbes reconnus : entre, sort, marche/va/rejoint, court,
+              s'assoit, se lève, salue, pointe, hoche la tête, secoue la tête, croise les bras, se retourne, sursaute, rit,
+              pleure, réfléchit, danse, regarde, chuchote.</li>
+            <li>Directives : <code>CAMÉRA: gros plan ALICE</code> (large, plan moyen, plan à deux, amorce, gros plan, plongée,
+              contre-plongée, travelling) ; <code>LUMIÈRE: orage</code> (jour, aube, crépuscule, nuit, intérieur, tamisée, néon, orage) ;
+              <code>AMBIANCE: pluie</code> (pluie, neige, brouillard) ; <code>DÉCOR: forêt</code> ; <code>PAUSE: 2</code>.</li>
+            <li>Les lignes commençant par <code>#</code> sont des commentaires.</li>
+          </ul>
+        </details>
+      </div>
+    </section>
+
+    <section class="colonne">
+      <div class="panneau">
+        <div class="ecran"><canvas id="rendu" width="1280" height="720" aria-label="Rendu 3D de la séquence"></canvas></div>
+        <div class="transport">
+          <button type="button" id="debut" aria-label="Revenir au début">⏮</button>
+          <button type="button" id="lecture" class="principal" aria-label="Lecture">▶ Lecture</button>
+          <input type="range" id="curseur" min="0" max="1" step="0.01" value="0" aria-label="Position dans la séquence">
+          <span id="temps">0:00.0 / 0:00.0</span>
+        </div>
+        <div id="frise" aria-hidden="true"><div id="tete-lecture"></div></div>
+        <div class="legende">
+          <span><i style="background:#5b4a6e"></i>Titre</span>
+          <span><i style="background:#3c6e71"></i>Établissement</span>
+          <span><i style="background:#7b3f98"></i>Dialogue</span>
+          <span><i style="background:#c27c2c"></i>Action</span>
+        </div>
+        <div class="options">
+          <label><input type="checkbox" id="opt-soustitres" checked> Sous-titres</label>
+          <label><input type="checkbox" id="opt-voix"> Voix de synthèse (aperçu)</label>
+          <label><input type="checkbox" id="opt-cinema"> Format 2.39:1</label>
+          <label>Rendu
+            <select id="opt-resolution">
+              <option value="1280x720" selected>1280 × 720</option>
+              <option value="1920x1080">1920 × 1080</option>
+              <option value="854x480">854 × 480</option>
+            </select>
+          </label>
+        </div>
+        <div class="boutons">
+          <button type="button" id="export-video" class="principal">Exporter la vidéo (WebM)</button>
+          <button type="button" id="export-image">Capture PNG</button>
+          <button type="button" id="export-plan">Plan de tournage (JSON)</button>
+        </div>
+        <p id="etat-export" role="status"></p>
+      </div>
+
+      <div class="grille-bas">
+        <div class="panneau">
+          <h2>Découpage</h2>
+          <ol id="decoupage"></ol>
+        </div>
+        <div class="panneau">
+          <h2>Analyse</h2>
+          <ul id="messages"></ul>
+          <details>
+            <summary>Raccourcis</summary>
+            <ul>
+              <li><code>Espace</code> : lecture / pause</li>
+              <li><code>←</code> <code>→</code> : reculer / avancer de 2 s</li>
+              <li><code>Ctrl + Entrée</code> dans l'éditeur : générer et lire</li>
+            </ul>
+          </details>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Scripts classiques : le studio fonctionne en ouvrant ce fichier directement, sans serveur ni connexion. -->
+  <script src="vendor/three.min.js"></script>
+  <script src="exemples/la-rumeur-du-boulanger.js"></script>
+  <script src="src/parser.js"></script>
+  <script src="src/director.js"></script>
+  <script src="src/stage.js"></script>
+  <script src="src/app.js"></script>
+</body>
+</html>
